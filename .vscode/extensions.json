@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    "idered.npm",
+    "nhoizey.gremlins",
+    "usernamehw.errorlens",
+    "esbenp.prettier-vscode",
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    "yoavbls.pretty-ts-errors",
+    "jscearcy.rust-doc-viewer",
+    "editorconfig.editorconfig",
+    "yzhang.markdown-all-in-one",
+    "chamboug.js-auto-backticks",
+    "github.vscode-github-actions",
+    "hbenl.vscode-mocha-test-adapter",
+    "christian-kohler.npm-intellisense",
+    "christian-kohler.path-intellisense"
+  ]
+}

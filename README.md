@@ -64,7 +64,7 @@ Use the Docker section above as reference for setting up variables and volumes.
 Clone the repository with `git clone --recursive`, open a terminal instance in the `/frontend` directory and another one in the `/backend` directory, then in both of them run `npm install` and `npm start`. The env variables are set in `package.json` file for both directories, and are the same ones listed in the Docker section above, plus `CONFIG_DIR` and `TASKS_DIR` for config and tasks directories paths.
 
 ## 🎨 Customize
-You can customize the application CSS through the `custom.css` (within `/config` directory if you're on Docker). You can replace the default `adwaita` theme with `nord` or `catppuccin`, or you can make your own changes. The easieste way to customize the application is to use the existing color variables (detailed [below](#color-variables)), but if you want to make changes other than color replacements you can use [index.css](frontend/src/stylesheets/index.css) file as a reference.
+You can customize the application CSS through the `custom.css` (within `/config` directory if you're on Docker). You can replace the default `adwaita` theme with `nord` or `catppuccin`, or you can make your own changes. The easieste way to customize the application is to use the existing color variables (detailed [below](#color-variables)), but if you want to make changes other than color replacements you can use [index.css](src/stylesheets/index.css) file as a reference.
 
 ### Color variables
 - `color-accent`: Highlight color;
@@ -100,7 +100,7 @@ More details (and it how it looks within Obsidian) can be found [here](https://g
 With the goal of having a good mix of performance and maintainability, the application was built with [SolidJS](https://github.com/solidjs/solid) and [Koa](https://github.com/koajs/koa). It also uses [Stacks-Editor](https://github.com/StackExchange/Stacks-Editor) for text editing and [serve-static](https://github.com/expressjs/serve-static) to serve the css files as-is.
 
 ## 🔨 Contribute
-This is a low maintenance project. The scope of features and support are purposefully kept narrow to ensure longer term maintenance is viable. Issues and PRs raised for bugs and quality of life improvements are perfectly fine, just don’t do that for features that significantly increase the scope of the project.
+This is a low maintenance project. The scope of features and support are purposefully kept narrow to ensure longer term maintenance is viable. Issues and PRs raised for bugs and quality of life improvements are perfectly fine, just don't do that for features that significantly increase the scope of the project.
 
 ### Sponsor
 If you like the project, consider [becoming a sponsor](https://github.com/sponsors/BaldissaraMatheus) with a one-time donation!
