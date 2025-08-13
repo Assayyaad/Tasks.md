@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onMount, createMemo, onCleanup } from 'solid-js'
-import { api } from '../api'
+import api from '../api'
 import { Menu } from './menu'
 import { handleKeyDown, clickOutside } from '../../../utils'
 import { makePersisted } from '@solid-primitives/storage'
@@ -149,11 +149,8 @@ function ExpandedCard(props) {
   function uploadImage(file) {
     const formData = new FormData()
     formData.set('file', file)
-    return fetch(`${api}/image`, {
-      method: 'POST',
-      mode: 'cors',
-      body: formData
-    })
+    return api
+      .uploadImage(formData)
       .then((res) => res.text())
       .then((imageName) => {
         handleEditorOnChange()

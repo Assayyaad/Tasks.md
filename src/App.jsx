@@ -1,7 +1,7 @@
 import { createSignal, For, Show, onMount, createMemo, createEffect, createResource, onCleanup, batch } from 'solid-js'
 import ExpandedCard from './frontend/src/components/expanded-card'
 import { debounce } from '@solid-primitives/scheduled'
-import { api } from './api'
+import api from './api'
 import { LaneName } from './frontend/src/components/lane-name'
 import { NameInput } from './frontend/src/components/name-input'
 import { Header } from './frontend/src/components/header'
@@ -86,7 +86,7 @@ function App() {
 
   function fetchTitle() {
     if (!board()) {
-      return fetch(`${api}/title`).then((res) => res.text())
+      return api.getTitle().then((res) => res.text())
     }
     const boardSplit = board().split('/')
     return decodeURI(boardSplit.at(-1))
@@ -101,24 +101,14 @@ function App() {
   }
 
   async function fetchData() {
-    const resourcesReq = fetch(`${api}/resource${board()}`, {
-      method: 'GET',
-      mode: 'cors'
-    }).then((res) => res.json())
-    const tagsReq = fetch(`${api}/tags${board()}`, {
-      method: 'GET',
-      mode: 'cors'
-    }).then((res) =>
-      res.json().then((resJson) =>
-        Object.entries(resJson).map((entry) => ({
-          name: entry[0],
-          backgroundColor: entry[1]
-        }))
-      )
+    const resourcesReq = api.getResource(board())
+    const tagsReq = api.getTags(board()).then((resJson) =>
+      Object.entries(resJson).map((entry) => ({
+        name: entry[0],
+        backgroundColor: entry[1]
+      }))
     )
-    const sortReq = fetch(`${api}/sort${board()}`, {
-      method: 'GET'
-    }).then((res) => res.json())
+    const sortReq = api.getSort(board())
     const [remoteTagOptions, resources, manualSort] = await Promise.all([tagsReq, resourcesReq, sortReq])
 
     const lanesFromApi = resources.map((resource) => resource.name)
@@ -180,15 +170,6 @@ function App() {
 
   const debounceChangeCardContent = debounce((newContent) => changeCardContent(newContent), 250)
 
-  function updateTagColors(mapTagToColor) {
-    return fetch(`${api}/tags${board()}`, {
-      method: 'PATCH',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(mapTagToColor)
-    })
-  }
-
   async function changeCardContent(newContent) {
     const newCards = structuredClone(cards())
     const newCardIndex = structuredClone(
@@ -196,23 +177,13 @@ function App() {
     )
     const newCard = newCards[newCardIndex]
     newCard.content = newContent
-    await fetch(`${api}/resource${board()}/${newCard.lane}/${newCard.name}.md`, {
-      method: 'PATCH',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: newContent })
+    await api.updateResource(`${board()}/${newCard.lane}/${newCard.name}.md`, null, newContent)
+    const remoteTagOptions = await api.getTags(board()).then((resJson) => {
+      return Object.entries(resJson).map((entry) => ({
+        name: entry[0],
+        backgroundColor: entry[1]
+      }))
     })
-    const remoteTagOptions = await fetch(`${api}/tags${board()}`, {
-      method: 'GET',
-      mode: 'cors'
-    }).then((res) =>
-      res.json().then((resJson) => {
-        return Object.entries(resJson).map((entry) => ({
-          name: entry[0],
-          backgroundColor: entry[1]
-        }))
-      })
-    )
     const cardTags = getTagsByCardContent(newContent)
     const cardTagsWithoutDuplicates = cardTags.filter(
       (tag, index, arr) =>
@@ -271,12 +242,7 @@ function App() {
     const newCards = structuredClone(cards())
     const newCard = { lane }
     const newCardName = v7()
-    await fetch(`${api}/resource${board()}/${lane}/${newCardName}.md`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isFile: true })
-    })
+    await api.createResource(`${board()}/${lane}/${newCardName}.md`, true)
     newCard.name = newCardName
     newCard.lastUpdated = new Date().toISOString()
     newCard.createdAt = new Date().toISOString()
@@ -287,10 +253,7 @@ function App() {
 
   function deleteCard(card) {
     const newCards = structuredClone(cards())
-    fetch(`${api}/resource${board()}/${card.lane}/${card.name}.md`, {
-      method: 'DELETE',
-      mode: 'cors'
-    })
+    api.deleteResource(`${board()}/${card.lane}/${card.name}.md`)
     const cardsWithoutDeletedCard = newCards.filter((cardToFind) => cardToFind.name !== card.name)
     setCards(cardsWithoutDeletedCard)
   }
@@ -298,11 +261,7 @@ function App() {
   async function createNewLane() {
     const newLanes = structuredClone(lanes())
     const newName = v7()
-    await fetch(`${api}/resource${board()}/${newName}`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' }
-    })
+    await api.createResource(`${board()}/${newName}`)
     newLanes.push(newName)
     setLanes(newLanes)
     setNewLaneName(newName)
@@ -310,12 +269,7 @@ function App() {
   }
 
   function renameLane() {
-    fetch(`${api}/resource${board()}/${laneBeingRenamedName()}`, {
-      method: 'PATCH',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPath: `${board()}/${newLaneName()}` })
-    })
+    api.updateResource(`${board()}/${laneBeingRenamedName()}`, `${board()}/${newLaneName()}`)
     const newLanes = structuredClone(lanes())
     const newLaneIndex = newLanes.findIndex((laneToFind) => laneToFind === laneBeingRenamedName())
     const newLane = newLanes[newLaneIndex]
@@ -331,10 +285,7 @@ function App() {
   }
 
   function deleteLane(lane) {
-    fetch(`${api}/resource${board()}/${lane}`, {
-      method: 'DELETE',
-      mode: 'cors'
-    })
+    api.deleteResource(`${board()}/${lane}`)
     const newLanes = structuredClone(lanes())
     const lanesWithoutDeletedCard = newLanes.filter((laneToFind) => laneToFind !== lane)
     setLanes(lanesWithoutDeletedCard)
@@ -389,10 +340,7 @@ function App() {
   function handleDeleteCardsByLane(lane) {
     const cardsToDelete = cards().filter((card) => card.lane === lane)
     for (const card of cardsToDelete) {
-      fetch(`${api}/resource${board()}/${lane}/${card.name}.md`, {
-        method: 'DELETE',
-        mode: 'cors'
-      })
+      api.deleteResource(`${board()}/${lane}/${card.name}.md`)
     }
     const cardsToKeep = cards().filter((card) => card.lane !== lane)
     setCards(cardsToKeep)
@@ -403,14 +351,10 @@ function App() {
     const newCardIndex = newCards.findIndex((card) => card.name === oldName)
     const newCard = newCards[newCardIndex]
     const newCardNameWithoutSpaces = newName.trim()
-    fetch(`${api}/resource${board()}/${newCard.lane}/${newCard.name}.md`, {
-      method: 'PATCH',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        newPath: `${board()}/${newCard.lane}/${newCardNameWithoutSpaces}.md`
-      })
-    })
+    api.updateResource(
+      `${board()}/${newCard.lane}/${newCard.name}.md`,
+      `${board()}/${newCard.lane}/${newCardNameWithoutSpaces}.md`
+    )
     newCard.name = newCardNameWithoutSpaces
     newCards[newCardIndex] = newCard
     setCards(newCards)
@@ -429,7 +373,7 @@ function App() {
       ...allTagsColors,
       ...tagColor
     }
-    await updateTagColors(newTagColors)
+    await api.updateTagBackgroundColor(board(), newTagColors)
     await fetchData()
     const newCardIndex = structuredClone(
       cards().findIndex((card) => card.name === selectedCard().name && card.lane === selectedCard().lane)
@@ -518,11 +462,8 @@ function App() {
       window.location.replace(`${url}/`)
     }
     fetchData()
-    const webSocket = new WebSocket(`${api}/watch`)
-    webSocket.addEventListener('message', (e) => {
-      if (e.data === 'files changed') {
-        fetchData()
-      }
+    window.addEventListener('filesChanged', () => {
+      fetchData()
     })
   })
 
@@ -548,14 +489,7 @@ function App() {
         [curr]: laneCardNames
       }
     }, {})
-    fetch(`${api}/sort${board()}`, {
-      method: 'PUT',
-      body: JSON.stringify(newSortJson),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    })
+    api.updateSort(board(), newSortJson)
     if (disableCardsDrag()) {
       return
     }
@@ -572,14 +506,7 @@ function App() {
     const oldIndex = cards().findIndex((card) => card.name === cardName)
     const card = cards()[oldIndex]
     const newCardLane = changedCard.to.slice('lane-content-'.length)
-    fetch(`${api}/resource${board()}/${card.lane}/${cardName}.md`, {
-      method: 'PATCH',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        newPath: `${board()}/${newCardLane}/${cardName}.md`
-      })
-    })
+    api.updateResource(`${board()}/${card.lane}/${cardName}.md`, `${board()}/${newCardLane}/${cardName}.md`)
     card.lane = newCardLane
     const newCards = lanes().flatMap((lane) => {
       let laneCards = cards().filter((card) => card.lane === lane && card.name !== cardName)
