@@ -1,7 +1,7 @@
 import { createEffect, createSignal, onMount, createMemo, onCleanup } from 'solid-js'
 import api from '../api'
 import { Menu } from './menu'
-import { handleKeyDown, clickOutside } from '../../../utils'
+import { handleKeyDown, clickOutside } from '../utils'
 import { makePersisted } from '@solid-primitives/storage'
 import { NameInput } from './name-input'
 import { Portal } from 'solid-js/web'

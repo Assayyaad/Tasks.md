@@ -11,7 +11,7 @@ import {
   useContext
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { useLongPress } from '../../../utils'
+import { useLongPress } from '../utils'
 
 const DragAndDropContext = createContext()
 

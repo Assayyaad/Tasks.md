@@ -1,5 +1,5 @@
 import { onMount } from 'solid-js'
-import { handleKeyDown, clickOutside } from '../../../utils'
+import { handleKeyDown, clickOutside } from '../utils'
 
 /**
  *

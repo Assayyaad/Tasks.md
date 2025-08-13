@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { Menu } from './menu'
-import { getButtonCoordinates, handleKeyDown } from '../../../utils'
+import { getButtonCoordinates, handleKeyDown } from '../utils'
 import { IconPlusSm, IconEllipsisVertical } from '@stackoverflow/stacks-icons/icons'
 
 /**

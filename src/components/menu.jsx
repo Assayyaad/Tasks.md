@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from 'solid-js'
-import { clickOutside, handleKeyDown } from '../../../utils'
+import { clickOutside, handleKeyDown } from '../utils'
 
 /**
  *

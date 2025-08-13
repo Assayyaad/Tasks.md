@@ -1,5 +1,5 @@
 import { createMemo } from 'solid-js'
-import { handleKeyDown } from '../../../utils'
+import { handleKeyDown } from '../utils'
 
 /**
  *
