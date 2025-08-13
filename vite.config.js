@@ -11,7 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         clientsClaim: true,
-        skipWaiting: true
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 3000000 // 3MB limit
       },
       devOptions: {
         enabled: true
@@ -57,6 +58,14 @@ export default defineConfig({
     port: Number(process.env.VITE_PORT)
   },
   build: {
-    target: 'esnext'
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['solid-js', '@solidjs/router'],
+          stacks: ['@stackoverflow/stacks', '@stackoverflow/stacks-icons']
+        }
+      }
+    }
   }
 })

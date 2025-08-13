@@ -1,12 +1,10 @@
-use tauri::{command, Manager, State, AppHandle, Emitter};
+use tauri::{command, State, AppHandle, Emitter};
 use std::fs;
 use std::path::Path;
 use serde_json::{Value, Map};
-use std::collections::HashMap;
 use uuid::Uuid;
 use std::sync::Mutex;
 use std::time::SystemTime;
-use tauri::async_runtime;
 
 // App state for configuration
 #[derive(Default)]
